@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B&N Özel Galası</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #E0E0E0;
+            --highlight-color: #FFD700;
+            --heart-color: #ff4757;
+            --background-color: #070010;
+            --curtain-red-dark: #8B0000;
+            --curtain-red-light: #DC143C;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Playfair Display', serif;
+            background-color: var(--background-color);
+            color: var(--primary-color);
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            cursor: none;
+        }
+
+        #loading-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: var(--background-color);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease;
+        }
+
+        .loader {
+            font-size: 3rem;
+            color: var(--highlight-color);
+            animation: loader-pulse 1.5s infinite;
+        }
+
+        @keyframes loader-pulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--highlight-color);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+            z-index: 10001;
+        }
+
+        .custom-cursor.hover {
+            transform: translate(-50%, -50%) scale(1.5);
+            border-color: var(--heart-color);
+            box-shadow: 0 0 15px var(--heart-color);
+        }
+
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(45deg, rgba(70, 20, 120, 0.3) 0%, rgba(20, 70, 120, 0.3) 50%, rgba(120, 20, 70, 0.3) 100%);
+            background-size: 400% 400%;
+            animation: aurora 20s ease infinite;
+            transition: filter 1s ease;
+        }
+
+        .aurora-bg.intensified {
+            filter: brightness(1.5) saturate(1.5);
+        }
+
+        @keyframes aurora {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .star-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><circle fill="%23fff" cx="20" cy="30" r="1"/><circle fill="%23ddd" cx="150" cy="170" r="1.2"/><circle fill="%23fff" cx="250" cy="60" r="0.8"/><circle fill="%23fff" cx="430" cy="280" r="1.1"/></svg>');
+            background-repeat: repeat;
+            animation: moveStars 120s linear infinite;
+        }
+
+        @keyframes moveStars {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-500px);
+            }
+        }
+
+        .section {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease, visibility 1.5s;
+        }
+
+        .section.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .section-content {
+            max-width: 700px;
+            z-index: 12;
+            transition: transform 0.1s linear;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .h1-char {
+            opacity: 0;
+            transform: translateY(20px);
+            display: inline-block;
+            animation: char-in 0.5s forwards;
+        }
+
+        @keyframes char-in {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.1));
+            border: 2px solid var(--highlight-color);
+            color: var(--highlight-color);
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            cursor: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 25px;
+            border-radius: 8px;
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.5s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.2));
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .btn.hidden {
+            display: none;
+        }
+
+        @keyframes fade-in-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Film poster yerine güzel bir görsel */
+        #film-visual {
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            animation: spotlight 2s forwards;
+            animation-delay: 1s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #film-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle fill="rgba(255,255,255,0.1)" cx="20" cy="20" r="2"/><circle fill="rgba(255,255,255,0.15)" cx="80" cy="30" r="1.5"/><circle fill="rgba(255,255,255,0.1)" cx="30" cy="70" r="1"/><circle fill="rgba(255,255,255,0.2)" cx="70" cy="80" r="2.5"/></svg>');
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .film-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .film-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+        }
+
+        @keyframes spotlight {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            }
+        }
+
+        .seats-container {
+            display: flex;
+            gap: 40px;
+            margin: 30px 0;
+        }
+
+        .seat {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #888;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            cursor: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, rgba(136, 136, 136, 0.1), rgba(136, 136, 136, 0.05));
+        }
+
+        .seat .seat-name {
+            opacity: 0;
+            transition: opacity 0.5s;
+            font-weight: bold;
+        }
+
+        .seat.selected .seat-name {
+            opacity: 1;
+        }
+
+        .seat::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 5px;
+            width: 50px;
+            height: 10px;
+            background: #888;
+            border-radius: 0 0 10px 10px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .seat:hover {
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .seat:hover::after {
+            background: var(--highlight-color);
+            box-shadow: 0 3px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .seat.selected {
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 20px var(--highlight-color);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+        }
+
+        .seat.selected::after {
+            background: var(--highlight-color);
+        }
+
+        #ticket-final {
+            border: 2px solid #444;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #ticket-final .line {
+            height: 2px;
+            background: var(--highlight-color);
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: print-line 2s forwards;
+            animation-delay: 0.5s;
+        }
+
+        #ticket-final p {
+            opacity: 0;
+            animation: print-text 0.5s forwards;
+        }
+
+        @keyframes print-line {
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        @keyframes print-text {
+            to {
+                opacity: 1;
+            }
+        }
+
+        #master-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #master-canvas.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .popup-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: var(--highlight-color);
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 10001;
+            opacity: 0;
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+
+        .popup-message.show {
+            opacity: 1;
+            transform: translate(-50%, -10px);
+        }
+
+        #gesture-heart-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        #gesture-heart-container.visible {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        #gesture-heart-container svg {
+            width: 200px;
+            height: 200px;
+            filter: drop-shadow(0 0 15px var(--heart-color));
+        }
+
+        #curtain-wrapper {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 9998;
+            pointer-events: none;
+            display: flex;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        #curtain-wrapper.visible {
+            opacity: 1;
+        }
+
+        .curtain {
+            width: 50.5%;
+            height: 100%;
+            background: linear-gradient(to right, var(--curtain-red-dark) 0%, var(--curtain-red-light) 30%, var(--curtain-red-light) 70%, var(--curtain-red-dark) 100%);
+            box-shadow: inset -10px 0 20px rgba(0, 0, 0, 0.5);
+            transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        .curtain.left {
+            transform-origin: left;
+            background: linear-gradient(to right, var(--curtain-red-dark) 0%, var(--curtain-red-light) 50%, var(--curtain-red-light) 100%);
+        }
+
+        .curtain.right {
+            transform-origin: right;
+            box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to left, var(--curtain-red-dark) 0%, var(--curtain-red-light) 50%, var(--curtain-red-light) 100%);
+        }
+
+        .curtain.open.left {
+            transform: translateX(-100%);
+        }
+
+        .curtain.open.right {
+            transform: translateX(100%);
+        }
+
+        .curtain::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(0, 0, 0, 0.1) 10px,
+                    rgba(0, 0, 0, 0.1) 20px);
+        }
+
+        .curtain::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to top, rgba(255, 215, 0, 0.4) 0%, transparent 100%);
+        }
+
+        /* Kalp atışı efekti için */
+        .heartbeat-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .heartbeat-indicator.visible {
+            opacity: 1;
+        }
+
+        .heartbeat-indicator svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 10px var(--heart-color));
+        }
+
+        .heartbeat-slow {
+            animation: heartbeat-slow 2s infinite;
+        }
+
+        .heartbeat-medium {
+            animation: heartbeat-medium 1.5s infinite;
+        }
+
+        .heartbeat-fast {
+            animation: heartbeat-fast 1s infinite;
+        }
+
+        @keyframes heartbeat-slow {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes heartbeat-medium {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.15);
+            }
+
+            50% {
+                transform: scale(1);
+            }
+
+            75% {
+                transform: scale(1.15);
+            }
+        }
+
+        @keyframes heartbeat-fast {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            20% {
+                transform: scale(1.2);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+
+            60% {
+                transform: scale(1.2);
+            }
+
+            80% {
+                transform: scale(1);
+            }
+        }
+
+        #film-ticket {
+            width: 320px;
+            margin: 0 auto 20px auto;
+            background: linear-gradient(135deg, #222 60%, #764ba2 100%);
+            border-radius: 18px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border: 2px dashed var(--highlight-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 20px 28px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #film-ticket:before,
+        #film-ticket:after {
+            content: '';
+            position: absolute;
+            left: -18px;
+            width: 36px;
+            height: 36px;
+            background: var(--background-color);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        #film-ticket:before {
+            top: -18px;
+        }
+
+        #film-ticket:after {
+            bottom: -18px;
+        }
+
+        .ticket-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--highlight-color);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .ticket-body {
+            font-size: 1.3rem;
+            color: #fff;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        /* CSS: .custom-cursor için kalp animasyonu */
+        .custom-cursor.heartbeat-anim {
+            animation: cursor-heartbeat 0.3s;
+        }
+
+        .custom-cursor.cursor-heart-mode {
+            border: none !important;
+            background: none !important;
+            width: 38px !important;
+            height: 38px !important;
+        }
+
+        .cursor-heart {
+            pointer-events: none;
+            z-index: 10002;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .cursor-heart-shape {
+            display: block;
+            width: 32px;
+            height: 32px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .cursor-heart-label {
+            position: absolute;
+            top: 50%;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 6px #070010, 0 0 2px #fff;
+            pointer-events: none;
+            user-select: none;
+            z-index: 2;
+        }
+
+        .cursor-heart-label-left {
+            left: -16px;
+            transform: translateY(-50%);
+        }
+
+        .cursor-heart-label-right {
+            right: -10px;
+            transform: translateY(-50%);
+        }
+
+        @keyframes cursor-heartbeat {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            30% {
+                transform: translate(-50%, -50%) scale(1.4);
+            }
+
+            60% {
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        html,
+        body,
+        * {
+            /* Tüm metinleri seçilemez yap */
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
+        }
+
+        /* Gala Menüsü için ek stiller */
+        #menu-section .gala-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            margin: 0 auto;
+        }
+
+        #menu-section .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        #menu-section .menu-item:hover {
+            border-color: var(--highlight-color);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        #menu-section .menu-item.selected {
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        #menu-section .menu-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #888;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            background: #222;
+        }
+
+        #menu-section .menu-item.selected .menu-checkbox {
+            background-color: var(--highlight-color);
+            border-color: var(--highlight-color);
+        }
+
+        #menu-section .menu-checkbox svg {
+            width: 16px;
+            height: 16px;
+            fill: #000;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #menu-section .menu-item.selected .menu-checkbox svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #menu-section .menu-text {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+        }
+
+        #menu-section .btn {
+            background: transparent;
+            border: 2px solid var(--highlight-color);
+            color: var(--highlight-color);
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+            border-radius: 8px;
+            width: 100%;
+            font-family: 'Playfair Display', serif;
+        }
+
+        #menu-section .btn:hover {
+            background-color: var(--highlight-color);
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* handwriting-nesrin için özel stil ve animasyonlar */
+        #handwriting-nesrin {
+            width: 340px;
+            height: 80px;
+            margin: 0 auto 10px auto;
+            position: relative;
+            overflow: visible;
+        }
+
+        .nesrin-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2.5s forwards;
+            stroke-width: 3;
+            stroke: white;
+            fill: none;
+        }
+
+        .nesrin-heart {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw-heart 1.2s forwards 2.7s,
+                       heart-stretch 1s cubic-bezier(.68,-0.55,.27,1.55) forwards 4.1s;
+            stroke-width: 3;
+            stroke: var(--heart-color);
+            fill: none;
+            filter: drop-shadow(0 0 8px #ff4757);
+            transform-origin: 100px 160px;
+        }
+
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes draw-heart {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes heart-stretch {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            60% {
+                transform: scale(1.8, 1.2) rotate(0deg);
+            }
+
+            80% {
+                transform: scale(1.5, 1.4) rotate(360deg);
+            }
+
+            100% {
+                transform: scale(1.6, 1.3) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading-screen">
+        <div class="loader">B&N</div>
+    </div>
+    <div class="custom-cursor"></div>
+    <div class="aurora-bg"></div>
+    <div class="star-bg"></div>
+    <canvas id="master-canvas"></canvas>
+    <div id="curtain-wrapper">
+        <div class="curtain left"></div>
+        <div class="curtain right"></div>
+    </div>
+
+    <!-- Kalp atışı göstergesi -->
+    <div class="heartbeat-indicator" id="heartbeat-indicator">
+        <svg viewBox="0 0 24 24">
+            <path fill="var(--heart-color)"
+                d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+        </svg>
+    </div>
+
+    <audio id="sound-swoosh" src="https://cdn.jsdelivr.net/gh/k-go/vsc-sound/sounds/swoosh.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="https://cdn.jsdelivr.net/gh/k-go/vsc-sound/sounds/click.mp3" preload="auto"></audio>
+    <audio id="sound-chime" src="https://cdn.jsdelivr.net/gh/k-go/vsc-sound/sounds/chime.mp3" preload="auto"></audio>
+    <audio id="sound-print" src="https://cdn.jsdelivr.net/gh/k-go/vsc-sound/sounds/print.mp3" preload="auto"></audio>
+    <audio id="sound-heartbeat" src="https://cdn.jsdelivr.net/gh/k-go/vsc-sound/sounds/heartbeat.mp3"
+        preload="auto"></audio>
+    <audio id="sound-curtain" src="https://www.soundjay.com/misc/sounds/curtain-opening-1.mp3" preload="auto"></audio>
+    <audio id="ambient-sound" loop
+        src="https://www.myinstants.com/media/sounds/interstellar-calm-space-ambience.mp3"></audio>
+
+    <div class="popup-message" id="popup-message"></div>
+    <div id="gesture-heart-container"><svg viewBox="0 0 24 24">
+            <path fill="var(--heart-color)"
+                d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+        </svg></div>
+
+    <section id="welcome" class="section active">
+        <div class="section-content parallax-element">
+            <h1 class="parallax-element typewriter">B&N Sinemaları Gururla Sunar</h1><button
+                class="btn parallax-element" data-target="#film-selection">Galamızı Başlat</button>
+        </div>
+    </section>
+    <section id="film-selection" class="section">
+        <div class="section-content parallax-element">
+            <h1 class="typewriter">Bu Gece Sizinle</h1>
+            <div id="film-ticket">
+                <div class="ticket-header">B&N</div>
+                <div class="ticket-body">Özel Gala Gecesi</div>
+            </div><button class="btn parallax-element" data-target="#seat-selection"
+                style="animation-delay:2s;">Koltukları Seç</button>
+        </div>
+    </section>
+    <section id="seat-selection" class="section">
+        <div class="section-content parallax-element">
+            <h1 class="typewriter">Bu Gece Yıldızların Altında...</h1>
+            <p style="font-style:italic;color:#bbb;">...yan yana iki koltuk bizi bekliyor.</p>
+            <div class="seats-container">
+                <div class="seat" data-seat="nesrin"><span class="seat-name">💜</span></div>
+                <div class="seat" data-seat="berk"><span class="seat-name">Berk</span></div>
+            </div><button id="menu-btn" class="btn hidden parallax-element" data-target="#ticket-printing">Bileti
+                Yazdır</button>
+        </div>
+    </section>
+    <section id="ticket-printing" class="section">
+        <div id="ticket-final" class="section-content parallax-element">
+            <p style="font-size:1.5rem;font-weight:bold;animation-delay:1s;">B&N GALA GECESİ</p>
+            <div class="line"></div>
+            <p style="animation-delay:1.5s;"><b>Film:</b>Karantina (2025)</p>
+            <p style="animation-delay:2s;"><b>Tarih:</b> <span id="ticket-date"></span></p>
+            <p style="animation-delay:2.5s;"><b>Koltuklar:</b> Berk & Nesrin</p>
+            <p style="animation-delay:3s;font-style:italic;">İyi seyirler yavrum.</p>
+        </div><button class="btn" data-target="#countdown-section" style="animation-delay:4s;">Salona Geç</button>
+    </section>
+    <section id="countdown-section" class="section">
+        <div class="section-content parallax-element">
+            <h1 class="typewriter">Geri Sayım</h1>
+            <div id="countdown" style="display:flex;gap:15px;margin:20px 0;justify-content:center;align-items:center;">
+                <div>
+                    <div id="days" style="font-size:3rem;">00</div>
+                    <div>Gün</div>
+                </div>
+                <div>
+                    <div id="hours" style="font-size:3rem;">00</div>
+                    <div>Saat</div>
+                </div>
+                <div>
+                    <div id="minutes" style="font-size:3rem;">00</div>
+                    <div>Dakika</div>
+                </div>
+                <div>
+                    <div id="seconds" style="font-size:3rem;">00</div>
+                    <div>Saniye</div>
+                </div>
+            </div>
+            <div id="handwriting-nesrin"></div>
+            <p style="font-style:italic;color:#bbb;">Birşeyler çizmeyecek misin? (b veya n çizebilirsin )</p>
+    </section>
+    <section id="showtime" class="section">
+        <div class="section-content parallax-element">
+            <h1 id="final-text" class="typewriter" style="opacity:0;transition:opacity 2s ease 1s;">Perde Açılıyor!</h1>
+            <p style="opacity:0;transition:opacity 2s ease 1.5s;">Telefonunu eline al, arıyorum…</p>
+        </div>
+    </section>
+    <section id="menu-section" class="section">
+        <div class="section-content parallax-element">
+            <h1 class="typewriter">Gala Menüsü</h1>
+            <div class="gala-container" style="margin:0 auto;">
+                <div class="menu-item">
+                    <div class="menu-checkbox">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                        </svg>
+                    </div>
+                    <span class="menu-text">Yanında Olma Hissi Paketi</span>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-checkbox">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                        </svg>
+                    </div>
+                    <span class="menu-text">Özlem Giderici Dakikalar</span>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-checkbox">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                        </svg>
+                    </div>
+                    <span class="menu-text">Sınırsız "İyi Ki Varsın" İçeceği</span>
+                </div>
+                <button id="print-ticket-btn" class="btn" style="margin-top:30px;">Bileti Yazdır</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script>
+        // Ekranın ortasında büyük kalp animasyonu göstermek için fonksiyon
+        function showCenterHeart(duration = 1200) {
+            const container = document.getElementById('gesture-heart-container');
+            if (!container) return;
+            container.classList.add('visible');
+            setTimeout(() => container.classList.remove('visible'), duration);
+        }
+
+        // İmleç kalp animasyonu için yardımcı fonksiyonlar
+        function setCursorHeart(heartbeatSpeed = 1000) {
+            const cursor = document.querySelector('.custom-cursor');
+            if (!cursor) return;
+            // Kalp SVG ve N/B label ekle
+            if (!cursor.querySelector('.cursor-heart-shape')) {
+                cursor.innerHTML = `
+                <span class="cursor-heart-shape">
+                    <svg width="28" height="28" viewBox="0 0 24 24">
+                        <path fill="#ff4757" d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>
+                </span>
+                <span class="cursor-heart-label cursor-heart-label-left">N</span>
+                <span class="cursor-heart-label cursor-heart-label-right">B</span>
+                `;
+            }
+            cursor.classList.add('cursor-heart-mode');
+            // Kalp atışı animasyonu
+            cursor.style.animation = `cursor-heartbeat ${heartbeatSpeed}ms infinite`;
+        }
+
+        function unsetCursorHeart() {
+            const cursor = document.querySelector('.custom-cursor');
+            if (!cursor) return;
+            cursor.classList.remove('cursor-heart-mode');
+            cursor.innerHTML = '';
+            cursor.style.animation = '';
+        }
+
+        window.addEventListener('load', () => { const l = document.getElementById('loading-screen'); l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 1000); });
+        document.addEventListener('DOMContentLoaded', () => {
+            const sounds = { swoosh: document.getElementById('sound-swoosh'), click: document.getElementById('sound-click'), chime: document.getElementById('sound-chime'), print: document.getElementById('sound-print'), heartbeat: document.getElementById('sound-heartbeat'), curtain: document.getElementById('sound-curtain'), ambient: document.getElementById('ambient-sound'), play: (name, vol = 1) => { sounds[name].volume = vol; sounds[name].currentTime = 0; sounds[name].play().catch(e => { }); } };
+            let soundPlayed = false; const popup = document.getElementById('popup-message');
+
+            const initTransitions = () => {
+                const btns = document.querySelectorAll('button[data-target]'); btns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        sounds.play('swoosh', 0.3); const cs = btn.closest('.section'), ti = btn.getAttribute('data-target'), ts = document.querySelector(ti); if (ts) { cs.classList.remove('active'); ts.classList.add('active'); initTypewriter(ts); }
+                        if (ti === '#ticket-printing') sounds.play('print', 0.6); if (ti === '#countdown-section') masterCanvas.start(); else masterCanvas.stop(); if (!soundPlayed) { sounds.play('ambient', 0.1); soundPlayed = true; }
+                    });
+                });
+            };
+            const initTypewriter = section => { const h1 = section.querySelector('.typewriter'); if (!h1 || h1.dataset.animated) return; const text = h1.innerText; h1.innerHTML = ''; h1.dataset.animated = "true"; text.split('').forEach((char, index) => { const s = document.createElement('span'); s.innerText = char === ' ' ? '\u00A0' : char; s.className = 'h1-char'; s.style.animationDelay = `${index * 0.05}s`; h1.appendChild(s); }); };
+            initTypewriter(document.querySelector('.section.active'));
+
+            const initTicketProcess = () => { const seats = document.querySelectorAll('.seat'), menuBtn = document.getElementById('menu-btn'); let selectedSeats = new Set(); seats.forEach(seat => { seat.addEventListener('click', () => { sounds.play('click', 0.5); const name = seat.dataset.seat; seat.classList.toggle('selected'); if (seat.classList.contains('selected')) selectedSeats.add(name); else selectedSeats.delete(name); if (selectedSeats.size === 2) menuBtn.classList.remove('hidden'); else menuBtn.classList.add('hidden'); }); }); document.getElementById('ticket-date').textContent = new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }); };
+
+            const initSecrets = () => { let kS = "", nC = false; window.addEventListener('keydown', e => { kS += e.key.toLowerCase(); if (kS.length > 6) kS = kS.slice(1); if (kS.includes("berk")) { confetti({ particleCount: 100, spread: 180, origin: { y: 0 }, shapes: ['heart'], colors: ['#ff4757', '#ff6b81'] }); kS = ""; } if (kS.includes("nesrin")) { document.querySelector('.aurora-bg').classList.add('intensified'); setTimeout(() => document.querySelector('.aurora-bg').classList.remove('intensified'), 3000); kS = ""; } }); const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']; let k_i = 0; window.addEventListener('keydown', e => { if (e.key.toLowerCase() === konami[k_i]) { k_i++; if (k_i === konami.length) { confetti({ particleCount: 100, angle: 90, spread: 100, origin: { y: 0.5 }, shapes: ['text'], shapeOptions: { text: { value: ['B', 'N'] } } }); k_i = 0; } } else k_i = 0; }); };
+
+            // Kalp atışı sistemi (idle kalınca imleçte kalp atışı efekti ve hızlanma)
+            const heartbeatSystem = (() => {
+                let idleTimer = null;
+                let heartbeatInterval = null;
+                let heartbeatSpeed = 1000; // Başlangıç hızı (ms)
+                let afkStep = 0;
+
+                function startHeartbeat() {
+                    let speed = 1000;
+                    afkStep = 0;
+                    clearInterval(heartbeatInterval);
+                    setCursorHeart(speed);
+                    heartbeatInterval = setInterval(() => {
+                        afkStep++;
+                        // Hızlandır
+                        if (afkStep === 2) speed = 600;
+                        if (afkStep === 5) speed = 350;
+                        setCursorHeart(speed);
+                        clearInterval(heartbeatInterval);
+                        heartbeatInterval = setInterval(() => {
+                            setCursorHeart(speed);
+                        }, speed);
+                    }, speed);
+                }
+
+                function stopHeartbeat() {
+                    clearInterval(heartbeatInterval);
+                    unsetCursorHeart();
+                }
+
+                function resetTimer() {
+                    clearTimeout(idleTimer);
+                    stopHeartbeat();
+                    idleTimer = setTimeout(() => {
+                        startHeartbeat();
+                    }, 1800);
+                }
+
+                return { resetTimer, stopHeartbeat };
+            })();
+
+            const masterCanvas = (() => {
+                const c = document.getElementById('master-canvas'), x = c.getContext('2d'), hC = document.getElementById('gesture-heart-container'); let s = [], p = [], m = { x: null, y: null, r: 120 }, a, i, w; const I = () => { c.width = window.innerWidth; c.height = window.innerHeight; s = []; for (let i = 0; i < (c.width * c.height) / 11000; i++)s.push(new S(Math.random() * c.width, Math.random() * c.height)); w = new S(Math.random() * c.width * 0.8 + c.width * 0.1, Math.random() * c.height * 0.8 + c.height * 0.1, true); s.push(w); }; class S { constructor(x, y, W = false) { this.x = x; this.y = y; this.s = W ? 3 : Math.random() * 2 + 1; this.bX = this.x; this.bY = this.y; this.d = (Math.random() * 20) + 5; this.c = 'rgba(255,255,255,0.8)'; this.iW = W; if (W) this.p = 0; } draw() { x.fillStyle = this.iW ? `rgba(255,255,150,${0.8 + Math.sin(this.p) * 0.2})` : this.c; x.beginPath(); x.arc(this.x, this.y, this.s, 0, Math.PI * 2); x.fill(); } update() { if (this.iW) { this.p += 0.05; return; } let X = m.x - this.x, Y = m.y - this.y, D = Math.sqrt(X * X + Y * Y); if (D < m.r) { let f = (m.r - D) / m.r, dX = X / D * f * this.d, dY = Y / D * f * this.d; this.x -= dX; this.y -= dY; this.c = `rgba(255,215,0,${1 - D / m.r})`; } else { if (this.x !== this.bX) this.x -= (this.x - this.bX) / 10; if (this.y !== this.bY) this.y -= (this.y - this.bY) / 10; this.c = 'rgba(255,255,255,0.8)'; } } }
+                class P { constructor() { this.x = m.x; this.y = m.y; this.s = Math.random() * 2 + 1; this.sX = Math.random() * 2 - 1; this.sY = Math.random() * 2 - 1; this.c = `hsl(${Math.random() * 60 + 200},100%,70%)`; this.l = 1; } update() { this.x += this.sX; this.y += this.sY; this.l -= 0.02; if (this.s > 0.1) this.s -= 0.03; } draw() { x.fillStyle = this.c; x.beginPath(); x.arc(this.x, this.y, this.s, 0, Math.PI * 2); x.globalAlpha = this.l; x.fill(); x.closePath(); } }
+                class H { constructor() { this.x = m.x; this.y = m.y; this.size = 20; this.life = 1; this.pulse = 0; this.speed = 0.05; this.maxSpeed = 0.25; this.speedInc = 0.002; this.idleTime = 0; } update() { this.pulse += this.speed; this.size = 20 + Math.sin(this.pulse) * 10; this.life -= 0.005; if (this.speed < this.maxSpeed) this.speed += this.speedInc; this.idleTime++; } draw() { x.save(); x.translate(this.x, this.y); x.beginPath(); x.moveTo(0, this.size / 2); x.bezierCurveTo(this.size / 2, 0, this.size, this.size / 4, this.size, this.size / 2); x.bezierCurveTo(this.size, this.size * 3 / 4, this.size / 2, this.size, 0, this.size); x.bezierCurveTo(-this.size / 2, this.size, -this.size, this.size * 3 / 4, -this.size, this.size / 2); x.bezierCurveTo(-this.size, this.size / 4, -this.size / 2, 0, 0, this.size / 2); x.fillStyle = `rgba(255,71,87,${this.life})`; x.fill(); x.restore(); } }
+                const A = () => { x.clearRect(0, 0, c.width, c.height); s.forEach(S => S.draw()); s.forEach(S => S.update()); for (let i = 0; i < p.length; i++) { p[i].update(); p[i].draw(); if (p[i].l <= 0) { p.splice(i, 1); i--; } } x.globalAlpha = 1; if (window.idleHeart && window.idleHeart.l > 0) { window.idleHeart.update(); window.idleHeart.draw(); } a = requestAnimationFrame(A); };
+                const M = e => { m.x = e.clientX; m.y = e.clientY; heartbeatSystem.resetTimer(); if (p.length < 50) for (let i = 0; i < 3; i++)p.push(new P()); clearTimeout(i); window.idleHeart = null; i = setTimeout(() => { window.idleHeart = new H(); let idleStart = Date.now(); function speedUpHeart() { if (!window.idleHeart) return; let idleDuration = (Date.now() - idleStart) / 1000; window.idleHeart.speed = 0.05 + Math.min(0.2, idleDuration * 0.03); window.idleHeart.maxSpeed = 0.25 + Math.min(0.3, idleDuration * 0.05); window.idleHeart.speedInc = 0.002 + Math.min(0.01, idleDuration * 0.002); if (window.idleHeart) setTimeout(speedUpHeart, 500); } speedUpHeart(); sounds.play('heartbeat', 0.2); }, 2000); };
+                c.addEventListener('click', e => { const d = Math.sqrt((e.clientX - w.x) ** 2 + (e.clientY - w.y) ** 2); if (d < 20) { popup.textContent = "Bu geceki tek dileğim, bir sonraki filmde koltukların arasında hiç mesafe olmaması... Seni seviyorum."; popup.classList.add('show'); sounds.play('chime'); setTimeout(() => popup.classList.remove('show'), 5000); w.x = 9999; } });
+                // Gesture ile N veya B harfi çizilince ortada büyük kalp çıkart
+                const G = () => {
+                    let drawing = false, points = [];
+                    const getPoint = e => e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+                    const start = e => { drawing = true; points = [getPoint(e)]; };
+                    const move = e => { if (drawing) points.push(getPoint(e)); };
+                    const end = () => {
+                        if (drawing) {
+                            drawing = false;
+                            if (detectN(points) || detectB(points)) {
+                                showCenterHeart(1500);
+                                if (typeof sounds !== "undefined") sounds.play('chime');
+                            }
+                            points = [];
+                        }
+                    };
+                    // N harfi gesture tespiti (daha toleranslı, yukarıdan aşağıya ve çapraz)
+                    const detectN = pts => {
+                        if (pts.length < 15) return false;
+                        let minX = Math.min(...pts.map(p => p.x)), maxX = Math.max(...pts.map(p => p.x));
+                        let minY = Math.min(...pts.map(p => p.y)), maxY = Math.max(...pts.map(p => p.y));
+                        let dx = maxX - minX, dy = maxY - minY;
+                        if (dx < 30 || dy < 40) return false;
+                        let first = pts[0], last = pts[pts.length - 1];
+                        // N: soldan başlar, sağa çapraz, tekrar aşağı
+                        return (first.x < last.x && first.y < last.y && dx > 30 && dy > 40);
+                    };
+                    // B harfi gesture tespiti (yukarıdan aşağıya ve sağa iki kavis)
+                    const detectB = pts => {
+                        if (pts.length < 20) return false;
+                        let minX = Math.min(...pts.map(p => p.x)), maxX = Math.max(...pts.map(p => p.x));
+                        let minY = Math.min(...pts.map(p => p.y)), maxY = Math.max(...pts.map(p => p.y));
+                        let dx = maxX - minX, dy = maxY - minY;
+                        if (dx < 30 || dy < 40) return false;
+                        let changes = 0;
+                        for (let i = 2; i < pts.length; i++) {
+                            if ((pts[i].x - pts[i - 1].x) * (pts[i - 1].x - pts[i - 2].x) < 0) changes++;
+                        }
+                        return changes >= 2;
+                    };
+                    // Tüm sayfa için event ekle
+                    window.addEventListener('mousedown', start);
+                    window.addEventListener('touchstart', start);
+                    window.addEventListener('mousemove', move);
+                    window.addEventListener('touchmove', move);
+                    window.addEventListener('mouseup', end);
+                    window.addEventListener('mouseleave', end);
+                    window.addEventListener('touchend', end);
+                };
+                return {
+                    start: () => { I(); c.classList.add('visible'); window.addEventListener('resize', I); window.addEventListener('mousemove', M); G(); if (!a) A(); },
+                    stop: () => { c.classList.remove('visible'); window.removeEventListener('resize', I); window.removeEventListener('mousemove', M); cancelAnimationFrame(a); a = null; }
+                };
+            })();
+
+            const initGrandFinale = () => { const cw = document.getElementById('curtain-wrapper'), cs = document.querySelectorAll('.curtain'); masterCanvas.stop(); document.querySelector('.section.active')?.classList.remove('active'); const st = document.querySelector('#showtime'); st.classList.add('active'); initTypewriter(st); cw.classList.add('visible'); sounds.play('curtain'); setTimeout(() => { cs.forEach(c => c.classList.add('open', c.classList.contains('left') ? 'left' : 'right')); }, 500); setTimeout(() => { document.getElementById('final-text').style.opacity = 1; }, 3500); setTimeout(() => { const p = st.querySelector('p'); if (p) p.style.opacity = 1; }, 4000); };
+
+            const initCursor = () => {
+                const c = document.querySelector('.custom-cursor');
+                if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                    c.style.display = 'none';
+                    return;
+                }
+                c.style.left = (window.innerWidth / 2) + 'px';
+                c.style.top = (window.innerHeight / 2) + 'px';
+                window.addEventListener('mousemove', e => {
+                    c.style.left = e.clientX + 'px';
+                    c.style.top = e.clientY + 'px';
+                    heartbeatSystem.resetTimer();
+                });
+                heartbeatSystem.resetTimer();
+            };
+
+            // Parallax fonksiyonunu ekle
+            function initParallax() {
+                const elements = document.querySelectorAll('.parallax-element');
+                window.addEventListener('mousemove', t => {
+                    let n = (t.clientX - window.innerWidth / 2) / window.innerWidth * 20,
+                        o = (t.clientY - window.innerHeight / 2) / window.innerHeight * 20;
+                    elements.forEach(e => {
+                        e.style.transform = `translate(${-n}px,${-o}px)`;
+                    });
+                });
+            }
+
+            // El yazısı "nesrin💜" animasyonu (yamuk ve eğik, random aralıklarla tekrar)
+            function handwritingNesrinLoop() {
+                const container = document.getElementById('handwriting-nesrin');
+                if (!container) return;
+                function animate() {
+                    // Rastgele pozisyon ve eğim
+                    const randX = Math.random() * 80;
+                    const randY = Math.random() * 20;
+                    const skewX = (Math.random() * 10) - 5;
+                    const skewY = (Math.random() * 10) - 5;
+                    const rotate = (Math.random() * 15) - 7.5;
+                    container.innerHTML = `
+<div style="position:absolute; left:${randX}px; top:${randY}px; width:220px; height:110px;">
+<svg width="220" height="110" viewBox="0 0 220 110" style="transform:skew(${skewX}deg,${skewY}deg) rotate(${rotate}deg);">
+  <g id="stroke">
+    <!-- "nesrin" el yazısı (örnek path, gerçek el yazısı için path değiştirilebilir) -->
+    <path class="nesrin-path" d="M20,90 Q35,40 60,70 Q80,100 60,110 Q40,120 30,100 Q20,80 40,60 Q60,40 80,60 Q100,80 80,100 Q60,120 50,100 Q40,80 60,60 Q80,40 100,60 Q120,80 100,100 Q80,120 70,100 Q60,80 80,60 Q100,40 120,60 Q140,80 120,100 Q100,120 90,100 Q80,80 100,60 Q120,40 140,60 Q160,80 140,100 Q120,120 110,100 Q100,80 120,60 Q140,40 160,60 Q180,80 160,100 Q140,120 130,100 Q120,80 140,60 Q160,40 180,60 Q200,80 180,100" />
+  </g>
+  <g id="stroke-heart">
+    <!-- Kalp, 'n' harfine bağlı ve uzatılmış -->
+    <path class="nesrin-heart" d="M180,100 
+        C170,120 160,140 175,155 
+        C190,170 210,160 200,140 
+        C210,160 230,170 245,155 
+        C260,140 250,120 240,100 
+        Z" />
+  </g>
+</svg>
+</div>
+                    `;
+                    setTimeout(() => {
+                        container.innerHTML = '';
+                        setTimeout(animate, 1800 + Math.random() * 2500);
+                    }, 5000);
+                }
+                animate();
+            }
+
+        });
